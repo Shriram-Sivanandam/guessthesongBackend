@@ -10,15 +10,38 @@ app.use(bodyParser.json());
 const clientId = 'c111d8cd377f4cf0946e51bf5470f005';
 const clientSecret = '521649fe5be74519909ed6e9b9139910';
 
+app.post('/refresh', (req, res) => {
+	const refreshToken = req.body.refreshToken;
+	console.log('hi');
+	const spotifyApi = new SpotifyWebAPI({
+		redirectUri: 'http://localhost:3000',
+		clientId: clientId,
+		clientSecret: clientSecret,
+		refreshToken,
+	});
+
+	spotifyApi
+		.refreshAccessToken()
+		.then((data) => {
+			res.json({
+				accessToken: data.body.access_token,
+				expiresIn: data.body.expires_in,
+			});
+		})
+		.catch((err) => {
+			res.sendStatus(400);
+		});
+});
+
 app.post('/login', (req, res) => {
 	const code = req.body.code;
-	const spotifyAPI = new SpotifyWebAPI({
+	const spotifyApi = new SpotifyWebAPI({
 		redirectUri: 'http://localhost:3000',
 		clientId: clientId,
 		clientSecret: clientSecret,
 	});
 
-	spotifyAPI
+	spotifyApi
 		.authorizationCodeGrant(code)
 		.then((data) => {
 			console.log('helllooo', code);
